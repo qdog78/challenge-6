@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Weather Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+
+  </head>
+  <body style="background-color: rgb(76, 160, 193);">
+    <div class="container mt-3">
+      <h1 class="text-center">QJ'S Weather Dashboard</h1>
+      <form id="search-form" class="mt-3">
+        <div class="row justify-content-center">
+          <div class="col-md-6 col-lg-4">
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control"
+                placeholder="Enter city name"
+                id="search-input"
+              />
+              <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    
+    <script>
+      $(document).ready(function() {
+        $("#search-form").submit(function(event) 
+{
+          event.preventDefault(); // prevent the form from submitting
+          var cityName = $("#search-input").val(); // get the city name from the input field
+          var apiKey = "6b22ea49ae297aac262c05f63026a799"; // your API key from OpenWeatherMap
+          var apiUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&appid=${apiKey}&cnt=5`; // construct the API URL
+    
+         
+         
+          $.ajax({
+            url: apiUrl,
+            method: "GET",
+            success: function(response) {
+  // get the relevant weather data from the API response
+  var cityName = response.city.name;
+  var weatherList = response.list;
+
+  // update the HTML with the city name
+  $("#city-name").text(cityName);
+
+  // update the HTML with the relevant information
+  for (var i = 0; i < weatherList.length; i++) {
+    // get the date and time for this weather data point
+    var date = moment(weatherList[i].dt_txt).format("dddd, MMMM Do YYYY, h:mm a");
+
+    //temperature in Fahrenheit and Celsius
+    var tempF = Math.round((weatherList[i].main.temp - 273.15) * 1.8 + 32);
+    var tempC = Math.round(weatherList[i].main.temp - 273.15);
+
+    // weather icon and description
+    var iconUrl = `https://openweathermap.org/img/w/${weatherList[i].weather[0].icon}.png`;
+    var description = weatherList[i].weather[0].description;
+
+    // update the HTML with this weather data point
+    var html = `
+      <div class="col-md-4">
+        <div class="card mb-4">
+          <div class="card-body">
+            <h5 class="card-title">${date}</h5>
+            <img src="${iconUrl}" alt="${description}" class="img-fluid">
+            <p class="card-text">${description}</p>
+            <p class="card-text">${tempF} &#8457; / ${tempC} &#8451;</p>
+          </div>
+        </div>
+      </div>
+    `;
+    $("#weather-data").append(html);
+  }
+
+  // this is to store the local storage
+  var searchHistory = localStorage.getItem("searchHistory");
+  if (searchHistory) {
+    // search history stored
+    searchHistory += "," + cityName;
+  } else {
+    
+    searchHistory = cityName;
+  }
+  localStorage.setItem("searchHistory", searchHistory);
+},
+
+            error: function(error) {
+              console.log(error); // log any errors to the console
+              // the errors should store locally as well
+            }
+          });
+        });
+      });
+    </script>
+    
+    <h2 id="city-name"></h2>
+
+    <div class="container-fluid">
+        <div class="row">
+          <div class="col-sm-3">
+        
+            <h2 id="city-name"></h2>
+
+        
+        
+        </div>
+
+          <div class="col-sm-9">
+        
+            <div id="weather-data"></div>
+        
+        
+        </div>
+        </div>
+      </div>
+
+
+  </body>
+</html>
